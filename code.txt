@@ -1,0 +1,143 @@
+import React, { Component } from "react";
+import Levels from "../Levels";
+import ProgressBar from "../ProgressBar";
+import { QuizMarvel } from "../quizMarvel";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+class Quiz extends Component {
+  state = {
+    levelNames: ["debutant", "confirme", "expert"],
+    quizLevel: 0,
+    maxQuestions: 10,
+    storedQuestion: [],
+    question: null,
+    options: [],
+    idQuestion: 0,
+    btnDisabled: true,
+    userAnswer: null,
+    score: 0,
+  };
+
+  storedDataRef = React.createRef();
+  
+  loadQuestion = (level) => {
+    const fetchedArray = QuizMarvel[0].quizz[level];
+    this.storedDataRef.current = fetchedArray;
+    console.log(this.storedDataRef.current );
+    if (fetchedArray.length >= this.state.maxQuestions) {
+      const newArray = fetchedArray.map(({ answer, ...rest }) => rest);
+      this.setState({
+        storedQuestion: newArray,
+      });
+    } else {
+    }
+  };
+
+  componentDidMount() {
+    this.loadQuestion(this.state.levelNames[this.state.quizLevel]);
+  }
+
+  showWelcomeMessage = (pseudo) => {
+    toast.warn(`Bienvenue ${pseudo} et bonne chance`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
+  // mes props
+  // les circles de vie
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.storedQuestion !== prevState.storedQuestion) {
+      this.setState({
+        question: this.state.storedQuestion[this.state.idQuestion].question,
+        options: this.state.storedQuestion[this.state.idQuestion].options,
+      });
+    }
+
+    if (this.state.idQuestion !== prevState.idQuestion) {
+      this.setState({
+        question: this.state.storedQuestion[this.state.idQuestion].question,
+        options: this.state.storedQuestion[this.state.idQuestion].options,
+        userAnswer: null,
+        btnDisabled: true,
+      });
+    }
+    // this.showWelcomeMessage(this.props.userData.pseudo);
+
+    if (this.props.userData.pseudo) {
+      console.log(this.props.userData.pseudo);
+      this.showWelcomeMessage(this.props.userData.pseudo);
+    }
+  }
+  
+// mes functions 
+  submitAnswer = (option) => {
+    this.setState({
+      userAnswer: option,
+      btnDisabled: false,
+    });
+  };
+  
+  nextQuestion = () => {
+    if (this.state.idQuestion === this.state.maxQuestions - 1) {
+      //End
+    } else {
+      this.setState((prevState) => ({
+        idQuestion: prevState.idQuestion + 1,
+      }));
+    }
+    const goodAnswer = this.storedDataRef.current[this.state.idQuestion].answer;
+    if (this.state.userAnswer === goodAnswer) {
+      this.setState((prevState) => ({
+        score: prevState.score + 1,
+      }));
+    }
+  };
+
+//JSX
+  render() {
+    // const { pseudo, email } = this.props.userData;
+    const { question, options, btnDisabled } = this.state;
+    const quiz = question;
+
+    const answer = options.map((option, index) => {
+      return (
+        <p
+          className={`answerOptions ${
+            this.state.userAnswer === option ? "selected" : null
+          }`}
+          key={index}
+          onClick={() => this.submitAnswer(option)}
+        >
+          {option}
+        </p>
+      );
+    });
+
+    const toast = <ToastContainer />;
+    return (
+      <div>
+        <Levels />
+        <ProgressBar />
+        <h2>{quiz}</h2>
+        {answer}
+        {toast}
+        <button
+          disabled={btnDisabled}
+          className="btnSubmit"
+          onClick={this.nextQuestion}
+        >
+          Suivant
+        </button>
+      </div>
+    );
+  }
+}
+
+export default Quiz;

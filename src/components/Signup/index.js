@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { auth } from "../Firebase/firebaseConfig";
+import { auth, user } from "../Firebase/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
+import { setDoc } from "firebase/firestore";
 
 const Signup = () => {
+  
   const data = {
     pseudo: "",
     email: "",
@@ -19,11 +21,14 @@ const Signup = () => {
     setLoginData({ ...loginData, [e.target.id]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
+  const register = () => {
+    const { email, password, pseudo } = loginData;
     createUserWithEmailAndPassword(auth, email, password)
-      .then((user) => {
+      .then((authUser) => {
+        console.log(authUser.user.uid);
+        return setDoc(user(authUser.user.uid), { pseudo, email });
+      })
+      .then(() => {
         setLoginData({ ...data });
         navigate("/Welcome", { replace: true });
       })
@@ -31,6 +36,11 @@ const Signup = () => {
         setError(error);
         setLoginData({ ...data });
       });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    register();
   };
 
   const { pseudo, email, password, confirmPassword } = loginData;

@@ -27,15 +27,12 @@ const Login = () => {
     }
   },[password,email,btn])
 
-
-
   const handleChange = (e) => {
     setLoginData({...loginData, [e.target.id]:e.target.value});
   }
 
-  const handleSubmit = (e) =>{
-    e.preventDefault();
-    const { email, password } = loginData;
+  const login = ()=>{
+    const { email, password, } = loginData;
 
     signInWithEmailAndPassword(auth, email, password)
       .then((user) => {
@@ -47,6 +44,11 @@ const Login = () => {
         setLoginData({...data})
       });
 
+  }
+
+  const handleSubmit = (e) =>{
+    e.preventDefault();
+    login();
   }
 
   const errorMessgae = error !== '' && <span> {error.message} </span>
@@ -65,7 +67,7 @@ const Login = () => {
 
             <form onSubmit={handleSubmit}>
               <div className="inputBox">
-                  <input onChange={handleChange} value={ email}  type="email" id="email" required />
+                  <input onChange={handleChange} value={ email }  type="email" id="email" required />
                   <label htmlFor="email">Email</label>
               </div>
 

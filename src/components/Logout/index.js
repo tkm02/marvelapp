@@ -7,7 +7,7 @@ const Logout = () => {
   const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const logout = () => {
     if (checked) {
       signOut(auth)
         .then(() => {
@@ -20,6 +20,10 @@ const Logout = () => {
           console.log("error");
         });
     }
+  };
+
+  useEffect(() => {
+    logout();
   }, [checked]);
 
   const handleChange = (e) => {
